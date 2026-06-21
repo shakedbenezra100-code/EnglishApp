@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\Uzer\\EnglishApp\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\EnglishApp.bundle.scp.css",
+      "PackagePath": "staticwebassets\\EnglishApp.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\Uzer\\EnglishApp\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "C:\\Users\\Uzer\\EnglishApp\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Users\\Uzer\\EnglishApp\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Uzer\\EnglishApp\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.EnglishApp.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.EnglishApp.props",
+      "PackagePath": "build\\EnglishApp.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.EnglishApp.props",
+      "PackagePath": "buildMultiTargeting\\EnglishApp.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.EnglishApp.props",
+      "PackagePath": "buildTransitive\\EnglishApp.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

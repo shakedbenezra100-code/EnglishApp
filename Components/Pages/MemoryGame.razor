@@ -1,0 +1,120 @@
+@page "/memorygame"
+@inject EnglishApp.Services.PictureService PictureService
+
+<PageTitle>Memory Game</PageTitle>
+
+<h1>Memory Game</h1>
+
+@if (SelectedCategory == null)
+{
+    <PictureCategorySelector OnCategoryChanged="OnCategoryChanged" />
+}
+else
+{
+    <div class="memory-game-board">
+        @foreach (var card in Cards)
+        {
+            <div class="memory-card @(card.IsFlipped ? "flipped" : "") @(card.IsMatched ? "matched" : "")" @onclick="(() => FlipCard(card))">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <img src="@card.PictureUrl" alt="Card Image" />
+                    </div>
+                    <div class="card-back"></div>
+                </div>
+            </div>
+        }
+    </div>
+    <button class="btn btn-primary mt-3" @onclick="ResetGame">Reset Game</button>
+}
+
+@code {
+    private string SelectedCategory { get; set; }
+    private List<MemoryCard> Cards { get; set; }
+    private List<MemoryCard> FlippedCards { get; set; }
+    private int MatchedPairs { get; set; }
+
+    protected override void OnInitialized()
+    {
+        FlippedCards = new List<MemoryCard>();
+    }
+
+    private void OnCategoryChanged(string category)
+    {
+        SelectedCategory = category;
+        InitializeGame();
+    }
+
+    private void InitializeGame()
+    {
+        var pictures = PictureService.GetPictures(SelectedCategory).ToList();
+        var gamePictures = pictures.Take(6).ToList(); // Use 6 unique pictures for a 12-card game
+
+        var allCards = new List<MemoryCard>();
+        foreach (var picUrl in gamePictures)
+        {
+            allCards.Add(new MemoryCard { Id = Guid.NewGuid(), PictureUrl = picUrl });
+            allCards.Add(new MemoryCard { Id = Guid.NewGuid(), PictureUrl = picUrl }); // Add a pair
+        }
+
+        Cards = allCards.OrderBy(a => Guid.NewGuid()).ToList(); // Shuffle cards
+        MatchedPairs = 0;
+        FlippedCards.Clear();
+    }
+
+    private async Task FlipCard(MemoryCard card)
+    {
+        if (FlippedCards.Count < 2 && !card.IsFlipped && !card.IsMatched)
+        {
+            card.IsFlipped = true;
+            FlippedCards.Add(card);
+
+            if (FlippedCards.Count == 2)
+            {
+                await Task.Delay(1000); // See the second card
+                CheckForMatch();
+            }
+        }
+    }
+
+    private void CheckForMatch()
+    {
+        var card1 = FlippedCards[0];
+        var card2 = FlippedCards[1];
+
+        if (card1.PictureUrl == card2.PictureUrl)
+        {
+            card1.IsMatched = true;
+            card2.IsMatched = true;
+            MatchedPairs++;
+        }
+        else
+        {
+            card1.IsFlipped = false;
+            card2.IsFlipped = false;
+        }
+
+        FlippedCards.Clear();
+
+        if (MatchedPairs == Cards.Count / 2)
+        {
+            // Game over, all matched!
+            // You can add a game completion message or action here.
+        }
+    }
+
+    private void ResetGame()
+    {
+        SelectedCategory = null;
+        Cards = null;
+        FlippedCards.Clear();
+        MatchedPairs = 0;
+    }
+
+    public class MemoryCard
+    {
+        public Guid Id { get; set; }
+        public string PictureUrl { get; set; }
+        public bool IsFlipped { get; set; }
+        public bool IsMatched { get; set; }
+    }
+}

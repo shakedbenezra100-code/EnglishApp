@@ -1,0 +1,24 @@
+@inject PictureService PictureService
+
+<h3>Select Picture Category</h3>
+
+<div class="form-group">
+    <label for="category">Category:</label>
+    <select id="category" class="form-control" @onchange="OnCategorySelected">
+        @foreach (var category in PictureService.GetCategories())
+        {
+            <option value="@category">@category</option>
+        }
+    </select>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnCategoryChanged { get; set; }
+
+    private async Task OnCategorySelected(ChangeEventArgs e)
+    {
+        string selectedCategory = e.Value.ToString();
+        await OnCategoryChanged.InvokeAsync(selectedCategory);
+    }
+}

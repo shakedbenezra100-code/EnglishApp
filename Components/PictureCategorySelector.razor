@@ -1,9 +1,8 @@
+@using EnglishApp.Services
 @inject PictureService PictureService
 
-<h3>Select Picture Category</h3>
-
 <div class="form-group">
-    <label for="category">Category:</label>
+    <label for="category">Categories:</label>
     <select id="category" class="form-control" @onchange="OnCategorySelected">
         @foreach (var category in PictureService.GetCategories())
         {

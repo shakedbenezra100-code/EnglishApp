@@ -1,9 +1,9 @@
-@page "/memorygame"
+@page "/combinedgame"
 @inject EnglishApp.Services.PictureService PictureService
 
-<PageTitle>Memory Game</PageTitle>
+<PageTitle>משחקים</PageTitle>
 
-<h1>Memory Game</h1>
+<h1>משחקים</h1>
 
 @if (SelectedCategory == null)
 {
@@ -11,6 +11,7 @@
 }
 else
 {
+    <h2>Memory Game</h2>
     <div class="memory-game-board">
         @foreach (var card in Cards)
         {
@@ -24,7 +25,18 @@ else
             </div>
         }
     </div>
-    <button class="btn btn-primary mt-3" @onclick="ResetGame">Reset Game</button>
+    <button class="btn btn-primary mt-3" @onclick="ResetGame">Reset Memory Game</button>
+
+    <h2 class="mt-5">Picture Cards</h2>
+    <div class="card-display-board">
+        @foreach (var pictureUrl in PicturesInSelectedCategory)
+        {
+            <div class="picture-card">
+                <img src="@pictureUrl" alt="Category Image" />
+            </div>
+        }
+    </div>
+    <button class="btn btn-primary mt-3" @onclick="ResetSelection">Choose Another Category</button>
 }
 
 @code {
@@ -32,6 +44,7 @@ else
     private List<MemoryCard> Cards { get; set; }
     private List<MemoryCard> FlippedCards { get; set; }
     private int MatchedPairs { get; set; }
+    private List<string> PicturesInSelectedCategory { get; set; }
 
     protected override void OnInitialized()
     {
@@ -42,6 +55,7 @@ else
     {
         SelectedCategory = category;
         InitializeGame();
+        PicturesInSelectedCategory = PictureService.GetPictures(SelectedCategory).ToList();
     }
 
     private void InitializeGame()
@@ -104,10 +118,16 @@ else
 
     private void ResetGame()
     {
+        InitializeGame();
+    }
+
+    private void ResetSelection()
+    {
         SelectedCategory = null;
         Cards = null;
         FlippedCards.Clear();
         MatchedPairs = 0;
+        PicturesInSelectedCategory = null;
     }
 
     public class MemoryCard

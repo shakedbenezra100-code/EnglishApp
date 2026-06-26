@@ -1,33 +1,32 @@
 @page "/games"
+@inject NavigationManager NavigationManager
 
-<PageTitle>Games</PageTitle>
+<h3>Choose a Game</h3>
 
-<h1>Choose a Game</h1>
-
-<div class="game-selection-container">
-    <div class="game-cube" @onclick='() => NavigateToGame("memory")'>
-        <h2>Memory Game</h2>
-        <p>Match the pairs of pictures.</p>
+<div class="games-container">
+    <div class="game-card" @onclick='() => SelectGame("wordmemory")'>
+        <div class="game-icon">🧠</div>
+        <h4>Memory Game</h4>
+        <p>Match words with pictures</p>
     </div>
-    <div class="game-cube" @onclick=\'() => NavigateToGame("wordcards")\'>
-        <h2>Word Cards</h2>
-        <p>Learn English words with pictures and Hebrew translations.</p>
+
+    <div class="game-card" @onclick='() => SelectGame("wordcards")'>
+        <div class="game-icon">🎴</div>
+        <h4>Flip Cards</h4>
+        <p>Flip cards to practice words</p>
     </div>
 </div>
 
 @code {
-    [Inject] 
-    public NavigationManager NavigationManager { get; set; }
-
-    private void NavigateToGame(string gameType)
+    private void SelectGame(string gameType)
     {
-        if (gameType == "memory")
+        if (gameType == "wordmemory")
         {
-            NavigationManager.NavigateTo($"/memorygame");
+            NavigationManager.NavigateTo($"/wordmemorygame");
         }
         else if (gameType == "wordcards")
         {
-            NavigationManager.NavigateTo($"/tempcombinedgame");
+            NavigationManager.NavigateTo($"/combinedgame");
         }
     }
 }

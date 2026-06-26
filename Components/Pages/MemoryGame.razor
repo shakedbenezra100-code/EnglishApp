@@ -1,9 +1,9 @@
-@page "/tempcombinedgame"
+@page "/memorygame"
 @inject EnglishApp.Services.PictureService PictureService
 
-<PageTitle>משחקים</PageTitle>
+<PageTitle>Memory Game</PageTitle>
 
-<h1>משחקים</h1>
+<h1>Memory Game</h1>
 
 @if (SelectedCategory == null)
 {
@@ -11,7 +11,6 @@
 }
 else
 {
-    <h2>Memory Game</h2>
     <div class="memory-game-board">
         @foreach (var card in Cards)
         {
@@ -26,17 +25,7 @@ else
         }
     </div>
     <button class="btn btn-primary mt-3" @onclick="ResetGame">Reset Memory Game</button>
-
-    <h2 class="mt-5">Picture Cards</h2>
-    <div class="card-display-board">
-        @foreach (var pictureUrl in PicturesInSelectedCategory)
-        {
-            <div class="picture-card">
-                <img src="@pictureUrl" alt="Category Image" />
-            </div>
-        }
-    </div>
-    <button class="btn btn-primary mt-3" @onclick="ResetSelection">Choose Another Category</button>
+    <button class="btn btn-secondary mt-3" @onclick="ResetSelection">Choose Another Category</button>
 }
 
 @code {
@@ -44,7 +33,6 @@ else
     private List<MemoryCard> Cards { get; set; }
     private List<MemoryCard> FlippedCards { get; set; }
     private int MatchedPairs { get; set; }
-    private List<string> PicturesInSelectedCategory { get; set; }
 
     protected override void OnInitialized()
     {
@@ -55,13 +43,11 @@ else
     {
         SelectedCategory = category;
         InitializeGame();
-        PicturesInSelectedCategory = PictureService.GetPictures(SelectedCategory).ToList();
     }
 
     private void InitializeGame()
     {
-        var pictures = PictureService.GetPictures(SelectedCategory).ToList();
-        var gamePictures = pictures.Take(6).ToList(); // Use 6 unique pictures for a 12-card game
+        var gamePictures = PictureService.GetPictures(SelectedCategory).OrderBy(x => Guid.NewGuid()).Take(6).ToList(); // Use 6 unique pictures for a 12-card game
 
         var allCards = new List<MemoryCard>();
         foreach (var picUrl in gamePictures)
@@ -127,7 +113,6 @@ else
         Cards = null;
         FlippedCards.Clear();
         MatchedPairs = 0;
-        PicturesInSelectedCategory = null;
     }
 
     public class MemoryCard

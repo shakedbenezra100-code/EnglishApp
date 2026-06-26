@@ -5,106 +5,106 @@ namespace EnglishApp.Services
 {
     public class PictureService
     {
-        private readonly Dictionary<string, List<string>> _pictureCategories = new Dictionary<string, List<string>>
+        private readonly Dictionary<string, Dictionary<string, string>> _pictureCategories = new Dictionary<string, Dictionary<string, string>>
         {
             {
-                "Food", new List<string>
+                "Food", new Dictionary<string, string>
                 {
-                    "images/food/apple.png",
-                    "images/food/banana.png",
-                    "images/food/carrot.png",
-                    "images/food/pizza.png"
+                    { "apple", "תפוח" },
+                    { "banana", "בננה" },
+                    { "carrot", "גזר" },
+                    { "pizza", "פיצה" }
                 }
             },
             {
-                "Animals", new List<string>
+                "Animals", new Dictionary<string, string>
                 {
-                    "images/animals/cat.png",
-                    "images/animals/dog.png",
-                    "images/animals/elephant.png",
-                    "images/animals/lion.png"
+                    { "cat", "חתול" },
+                    { "dog", "כלב" },
+                    { "elephant", "פיל" },
+                    { "lion", "אריה" }
                 }
             },
             {
-                "Colors", new List<string>
+                "Colors", new Dictionary<string, string>
                 {
-                    "images/colors/blue.png",
-                    "images/colors/green.png",
-                    "images/colors/red.png",
-                    "images/colors/yellow.png"
-                }              
+                    { "blue", "כחול" },
+                    { "green", "ירוק" },
+                    { "red", "אדום" },
+                    { "yellow", "צהוב" }
+                }
             },
             {
-                "Numbers", new List<string>
+                "Numbers", new Dictionary<string, string>
                 {
-                    "images/numbers/one.png",
-                    "images/numbers/two.png",
-                    "images/numbers/three.png",
-                    "images/numbers/four.png"
-                }        
+                    { "one", "אחד" },
+                    { "two", "שתיים" },
+                    { "three", "שלוש" },
+                    { "four", "ארבע" }
+                }
             },
             {
-                "Clothes", new List<string>
+                "Clothes", new Dictionary<string, string>
                 {
-                    "images/clothes/shirt.png",
-                    "images/clothes/pants.png",
-                    "images/clothes/dress.png",
-                    "images/clothes/shoes.png"
-                }              
+                    { "shirt", "חולצה" },
+                    { "pants", "מכנסיים" },
+                    { "dress", "שמלה" },
+                    { "shoes", "נעליים" }
+                }
             },
             {
-                "Seasons", new List<string>
+                "Seasons", new Dictionary<string, string>
                 {
-                    "images/seasons/spring.png",
-                    "images/seasons/summer.png",
-                    "images/seasons/fall.png",
-                    "images/seasons/winter.png"
-                }     
+                    { "spring", "אביב" },
+                    { "summer", "קיץ" },
+                    { "fall", "סתיו" },
+                    { "winter", "חורף" }
+                }
             },
             {
-                "Family Members", new List<string>
+                "Family Members", new Dictionary<string, string>
                 {
-                    "images/family_members/mother.png",
-                    "images/family_members/father.png",
-                    "images/family_members/brother.png",
-                    "images/family_members/sister.png"
-                }                
+                    { "mother", "אמא" },
+                    { "father", "אבא" },
+                    { "brother", "אח" },
+                    { "sister", "אחות" }
+                }
             },
             {
-                "Rooms", new List<string>
+                "Rooms", new Dictionary<string, string>
                 {
-                    "images/rooms/living_room.png",
-                    "images/rooms/bedroom.png",
-                    "images/rooms/kitchen.png",
-                    "images/rooms/bathroom.png"
-                }                
+                    { "living_room", "סלון" },
+                    { "bedroom", "חדר שינה" },
+                    { "kitchen", "מטבח" },
+                    { "bathroom", "אמבטיה" }
+                }
             },
             {
-                "Transportation", new List<string>
+                "Transportation", new Dictionary<string, string>
                 {
-                    "images/transportation/car.png",
-                    "images/transportation/bus.png",
-                    "images/transportation/bike.png",
-                    "images/transportation/truck.png"
-                }                
+                    { "car", "מכונית" },
+                    { "bus", "אוטובוס" },
+                    { "bike", "אופניים" },
+                    { "truck", "משאית" }
+                }
             },
             {
-                "The Human Body", new List<string>
+                "The Human Body", new Dictionary<string, string>
                 {
-                    "images/human_body/head.png",
-                    "images/human_body/arm.png",
-                    "images/human_body/leg.png",
-                    "images/human_body/hand.png"
-                }                
+                    { "head", "ראש" },
+                    { "arm", "זרוע" },
+                    { "leg", "רגל" },
+                    { "hand", "יד" }
+                }
             },
             {
-                "Stuff", new List<string>
+                "Stuff", new Dictionary<string, string>
                 {
-                    "images/stuff/table.png",
-                    "images/stuff/bottle.png",
-                    "images/stuff/ball.png",
-                    "images/stuff/bed.png"
-                }                
+                    { "table", "שולחן" },
+                    { "bottle", "בקבוק" },
+                    { "ball", "כדור" },
+                    { "bed", "מיטה" }
+                }
             }
         };
 
@@ -113,13 +113,34 @@ namespace EnglishApp.Services
             return _pictureCategories.Keys;
         }
 
+        public IEnumerable<KeyValuePair<string, string>> GetPicturesWithTranslations(string category)
+        {
+            if (_pictureCategories.TryGetValue(category, out var wordsAndTranslations))
+            {
+                return wordsAndTranslations;
+            }
+            return Enumerable.Empty<KeyValuePair<string, string>>();
+        }
+
         public IEnumerable<string> GetPictures(string category)
         {
-            if (_pictureCategories.TryGetValue(category, out var pictures))
+            if (_pictureCategories.TryGetValue(category, out var wordsAndTranslations))
             {
-                return pictures;
+                return wordsAndTranslations.Select(kv => $"images/{category.ToLower().Replace(" ", "_")}/{kv.Key}.png");
             }
             return Enumerable.Empty<string>();
+        }
+
+        public string GetHebrewTranslation(string category, string englishWord)
+        {
+            if (_pictureCategories.TryGetValue(category, out var wordsAndTranslations))
+            {
+                if (wordsAndTranslations.TryGetValue(englishWord, out var translation))
+                {
+                    return translation;
+                }
+            }
+            return "Translation Not Found"; // Or handle as appropriate
         }
     }
 }

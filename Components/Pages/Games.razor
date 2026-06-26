@@ -9,8 +9,10 @@
         <h2>Memory Game</h2>
         <p>Match the pairs of pictures.</p>
     </div>
-
-
+    <div class="game-cube" @onclick=\'() => NavigateToGame("wordcards")\'>
+        <h2>Word Cards</h2>
+        <p>Learn English words with pictures and Hebrew translations.</p>
+    </div>
 </div>
 
 @code {
@@ -19,6 +21,13 @@
 
     private void NavigateToGame(string gameType)
     {
-        NavigationManager.NavigateTo($"/tempcombinedgame");
+        if (gameType == "memory")
+        {
+            NavigationManager.NavigateTo($"/memorygame");
+        }
+        else if (gameType == "wordcards")
+        {
+            NavigationManager.NavigateTo($"/tempcombinedgame");
+        }
     }
 }

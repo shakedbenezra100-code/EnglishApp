@@ -1,0 +1,102 @@
+@page "/memory-game/{CategoryName}"
+@using EnglishApp.Services
+@inject EnglishApp.Services.GameService GameService
+<h3>משחק הזיכרון - קטגוריית @CategoryName</h3>
+
+<div class="row">
+    @foreach (var card in ShuffledCards)
+    {
+        <div class="col-3 mb-3">
+            <div class="card text-center text-white bg-secondary cursor-pointer" 
+                 @onclick="() => RevealCard(card)" 
+                 style="height: 150px; justify-content: center; align-items: center;">
+                @if (card.IsRevealed || card.IsMatched)
+                {
+                    <img src="@card.ImageUrl" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                }
+                else
+                {
+                    <span class="fs-1">?</span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string CategoryName { get; set; } = "";
+    private List<MemoryCard> ShuffledCards = new();
+    private MemoryCard? firstSelected = null;
+    private MemoryCard? secondSelected = null;
+
+    protected override void OnParametersSet()
+    {
+        InitializeGame();
+    }
+
+    private void InitializeGame()
+    {
+        var baseImages = GameService.GetCategoryImages(CategoryName);
+        
+        // מגבילים את הכמות לזוגות לפי גודל הלוח הרצוי (למשל מקסימום 8 זוגות = 16 כרטיסים)
+        int maxPairs = Math.Min(8, baseImages.Count); 
+        var selectedImages = baseImages.OrderBy(x => Guid.NewGuid()).Take(maxPairs).ToList();
+
+        ShuffledCards.Clear();
+        int id = 0;
+        foreach (var img in selectedImages)
+        {
+            // מוסיפים שני כרטיסים מכל תמונה
+            ShuffledCards.Add(new MemoryCard { Id = id++, ImageUrl = img });
+            ShuffledCards.Add(new MemoryCard { Id = id++, ImageUrl = img });
+        }
+
+        // ערבוב סופי
+        ShuffledCards = ShuffledCards.OrderBy(x => Guid.NewGuid()).ToList();
+    }
+
+    private async Task RevealCard(MemoryCard card)
+    {
+        if (card.IsRevealed || card.IsMatched || secondSelected != null) return;
+
+        card.IsRevealed = true;
+
+        if (firstSelected == null)
+        {
+            firstSelected = card;
+        }
+        else
+        {
+            secondSelected = card;
+            StateHasChanged();
+
+            if (firstSelected.ImageUrl == secondSelected.ImageUrl)
+            {
+                firstSelected.IsMatched = true;
+                secondSelected.IsMatched = true;
+                ResetSelection();
+            }
+            else
+            {
+                await Task.Delay(1000); // השהייה כדי שיראו את הטעות
+                firstSelected.IsRevealed = false;
+                secondSelected.IsRevealed = false;
+                ResetSelection();
+            }
+        }
+    }
+
+    private void ResetSelection()
+    {
+        firstSelected = null;
+        secondSelected = null;
+    }
+
+    public class MemoryCard
+    { 
+        public int Id { get; set; }
+        public string ImageUrl { get; set; } = "";
+        public bool IsRevealed { get; set; }
+        public bool IsMatched { get; set; }
+    }
+}

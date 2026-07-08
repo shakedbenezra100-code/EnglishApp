@@ -21,6 +21,12 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "Components", "bootstrap")),
+    RequestPath = "/bootstrap"
+});
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()

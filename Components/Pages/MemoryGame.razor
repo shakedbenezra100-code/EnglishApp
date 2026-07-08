@@ -1,5 +1,4 @@
 @page "/memorygame"
-@rendermode InteractiveWebAssembly
 @inject EnglishApp.Services.PictureService PictureService
 
 <PageTitle>Memory Game</PageTitle>
@@ -15,12 +14,18 @@ else
     <div class="memory-game-board">
         @foreach (var card in Cards)
         {
-            <div class="memory-card @(card.IsFlipped ? "flipped" : "") @(card.IsMatched ? "matched" : "")" @onclick="(() => FlipCard(card))">
+            @* מחקנו מכאן את ה-onclick והעברנו פנימה *@
+            <div class="memory-card @(card.IsFlipped ? "flipped" : "") @(card.IsMatched ? "matched" : "")">
                 <div class="card-inner">
-                    <div class="card-front">
+                    @* הצד האחורי של הקלף (מה שרואים כשהוא סגור - למשל סימן שאלה או רקע קבוע) *@
+                    <div class="card-back" @onclick="(() => FlipCard(card))">
+                        <div class="cover-design">?</div>
+                    </div>
+
+                    @* הצד הקדמי של הקלף (התמונה שרואים רק כשהוא מתהפך) *@
+                    <div class="card-front" @onclick="(() => FlipCard(card))">
                         <img src="@card.PictureUrl" alt="Card Image" />
                     </div>
-                    <div class="card-back"></div>
                 </div>
             </div>
         }
@@ -68,11 +73,13 @@ else
         {
             card.IsFlipped = true;
             FlippedCards.Add(card);
+            StateHasChanged(); // מאלץ את ה-UI להתרענן ולהציג את ההיפוך מיד
 
             if (FlippedCards.Count == 2)
             {
-                await Task.Delay(1000); // See the second card
+                await Task.Delay(1000); // רואים את הכרטיס השני לשנייה אחת
                 CheckForMatch();
+                StateHasChanged(); // מאלץ ריענון נוסף אחרי בדיקת ההתאמה
             }
         }
     }
@@ -99,7 +106,6 @@ else
         if (MatchedPairs == Cards.Count / 2)
         {
             // Game over, all matched!
-            // You can add a game completion message or action here.
         }
     }
 

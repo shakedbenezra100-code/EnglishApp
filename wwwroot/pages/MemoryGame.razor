@@ -1,102 +1,198 @@
 @page "/memory-game/{CategoryName}"
 @using EnglishApp.Services
-@inject EnglishApp.Services.GameService GameService
-<h2>משחק הזיכרון - קטגוריית @CategoryName</h2>
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@rendermode InteractiveServer
+@inject GameService GameService
+@inject NavigationManager NavigationManager
 
-<div class="row">
-    @foreach (var card in ShuffledCards)
-    {
-        <div class="col-3 mb-3">
-            <div class="card text-center text-white bg-secondary cursor-pointer" 
-                 @onclick="() => RevealCard(card)" 
-                 style="height: 150px; justify-content: center; align-items: center;">
-                @if (card.IsRevealed || card.IsMatched)
-                {
-                    <img src="@card.ImageUrl" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
-                }
-                else
-                {
-                    <span class="fs-1">?</span>
-                }
-            </div>
+<h3 class="text-center my-4">משחק הזיכרון - קטגוריית @CategoryName</h3>
+
+@if (IsGameFinished)
+{
+    <div class="text-center mt-5">
+        <div class="alert alert-success fs-3 shadow-sm">כל הכבוד! סיימת את המשחק ב-@Moves צעדים!</div>
+        <button class="btn btn-success btn-lg shadow" @onclick="ResetGame">שחק שוב</button>
+        <button class="btn btn-outline-secondary btn-lg ms-3" @onclick="GoBackToGames">חזרה למשחקים</button>
+    </div>
+}
+else
+{
+    <div class="text-center mb-3">
+        <span class="fs-5 badge bg-primary p-2">מהלכים: @Moves</span>
+    </div>
+
+    <div class="container">
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3 justify-content-center">
+            @foreach (var card in Cards)
+            {
+                <div class="col d-flex justify-content-center">
+                    @* קובייה פשוטה ויציבה לחלוטין *@
+                    <div class="memory-card-box shadow-sm" @onclick="() => HandleCardClick(card)">
+                        
+                        @if (card.IsFlipped || card.IsMatched)
+                        {
+                            @* מצב פתוח: מציגים אך ורק את התמונה *@
+                            <div class="card-content image-face @(card.IsMatched ? "matched" : "")">
+                                <img src="@card.ImageUrl" />
+                            </div>
+                        }
+                        else
+                        {
+                            @* מצב סגור: מציגים אך ורק את הסימן שאלה *@
+                            <div class="card-content back-face">
+                                <span>?</span>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            }
         </div>
+    </div>
+}
+
+<style>
+    .memory-card-box {
+        width: 120px;
+        height: 120px;
+        background-color: #ffffff;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        cursor: pointer;
+        user-select: none;
+        overflow: hidden;
     }
-</div>
+
+    .card-content {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* עיצוב הגב עם הסימן שאלה */
+    .back-face {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    /* עיצוב הפנים עם התמונה */
+    .image-face img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    /* עיצוב קלף שנמצא לו זוג */
+    .matched {
+        background-color: #e8f5e9;
+        border: 2px solid #198754;
+    }
+</style>
 
 @code {
-    [Parameter] public string CategoryName { get; set; } = "";
-    private List<MemoryCard> ShuffledCards = new();
-    private MemoryCard? firstSelected = null;
-    private MemoryCard? secondSelected = null;
+    [Parameter]
+    public string CategoryName { get; set; } = string.Empty;
+
+    private List<MemoryCard> Cards { get; set; } = new List<MemoryCard>();
+    private MemoryCard? firstSelectedCard = null;
+    private MemoryCard? secondSelectedCard = null;
+    private bool isChecking = false; 
+    private int Moves = 0;
+
+    private bool IsGameFinished => Cards.Count > 0 && Cards.All(c => c.IsMatched);
 
     protected override void OnParametersSet()
     {
-        InitializeGame();
+        ResetGame();
     }
 
-    private void InitializeGame()
+    private void ResetGame()
     {
-        var baseImages = GameService.GetCategoryImages(CategoryName);
-        
-        // מגבילים את הכמות לזוגות לפי גודל הלוח הרצוי (למשל מקסימום 8 זוגות = 16 כרטיסים)
-        int maxPairs = Math.Min(8, baseImages.Count); 
-        var selectedImages = baseImages.OrderBy(x => Guid.NewGuid()).Take(maxPairs).ToList();
+        Moves = 0;
+        firstSelectedCard = null;
+        secondSelectedCard = null;
+        isChecking = false;
 
-        ShuffledCards.Clear();
-        int id = 0;
-        foreach (var img in selectedImages)
+        if (string.IsNullOrEmpty(CategoryName))
         {
-            // מוסיפים שני כרטיסים מכל תמונה
-            ShuffledCards.Add(new MemoryCard { Id = id++, ImageUrl = img });
-            ShuffledCards.Add(new MemoryCard { Id = id++, ImageUrl = img });
+            CategoryName = "food";
         }
 
-        // ערבוב סופי
-        ShuffledCards = ShuffledCards.OrderBy(x => Guid.NewGuid()).ToList();
+        var baseImages = GameService.GetCategoryImages(CategoryName);
+
+        var cardList = new List<MemoryCard>();
+        int idCounter = 0;
+
+        if (baseImages != null && baseImages.Any())
+        {
+            foreach (var img in baseImages)
+            {
+                cardList.Add(new MemoryCard { Id = idCounter++, ImageUrl = img });
+                cardList.Add(new MemoryCard { Id = idCounter++, ImageUrl = img });
+            }
+        }
+
+        Cards = cardList.OrderBy(x => Guid.NewGuid()).ToList();
+        StateHasChanged();
     }
 
-    private async Task RevealCard(MemoryCard card)
+    private async Task HandleCardClick(MemoryCard clickedCard)
     {
-        if (card.IsRevealed || card.IsMatched || secondSelected != null) return;
+        if (isChecking || clickedCard.IsFlipped || clickedCard.IsMatched)
+            return;
 
-        card.IsRevealed = true;
+        clickedCard.IsFlipped = true;
+        StateHasChanged(); 
 
-        if (firstSelected == null)
+        if (firstSelectedCard == null)
         {
-            firstSelected = card;
+            firstSelectedCard = clickedCard;
         }
         else
         {
-            secondSelected = card;
-            StateHasChanged();
+            secondSelectedCard = clickedCard;
+            Moves++;
+            isChecking = true;
+            StateHasChanged(); 
 
-            if (firstSelected.ImageUrl == secondSelected.ImageUrl)
+            if (firstSelectedCard.ImageUrl == secondSelectedCard.ImageUrl)
             {
-                firstSelected.IsMatched = true;
-                secondSelected.IsMatched = true;
-                ResetSelection();
+                firstSelectedCard.IsMatched = true;
+                secondSelectedCard.IsMatched = true;
+                ResetTurn();
             }
             else
             {
-                await Task.Delay(1000); // השהייה כדי שיראו את הטעות
-                firstSelected.IsRevealed = false;
-                secondSelected.IsRevealed = false;
-                ResetSelection();
+                await Task.Delay(1000);
+                firstSelectedCard.IsFlipped = false;
+                secondSelectedCard.IsFlipped = false;
+                ResetTurn();
             }
         }
     }
 
-    private void ResetSelection()
+    private void ResetTurn()
     {
-        firstSelected = null;
-        secondSelected = null;
+        firstSelectedCard = null;
+        secondSelectedCard = null;
+        isChecking = false;
+        StateHasChanged();
+    }
+
+    private void GoBackToGames()
+    {
+        NavigationManager.NavigateTo("/games"); 
     }
 
     public class MemoryCard
-    { 
+    {
         public int Id { get; set; }
         public string ImageUrl { get; set; } = "";
-        public bool IsRevealed { get; set; }
-        public bool IsMatched { get; set; }
+        public bool IsFlipped { get; set; } = false;
+        public bool IsMatched { get; set; } = false;
     }
 }

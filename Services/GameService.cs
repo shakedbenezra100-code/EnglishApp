@@ -1,54 +1,67 @@
-using System.Collections.Generic;
-using System.Linq;
 using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace EnglishApp.Services
 {
     public class GameService
     {
-        public string SelectedCategory { get; private set; } = "";
-        public List<string> CurrentCategoryImages { get; private set; } = new();
-
-        // אירוע שיעדכן את הרכיבים כשהקטגוריה משתנה
-        public event Action? OnCategoryChanged;
-
-        // הגדרת התמונות מראש (או שמות הקבצים המדויקים שיש לך בתיקיות)
-        private readonly Dictionary<string, List<string>> _categoryDatabase = new()
+        public List<string> GetCategoryImages(string categoryName)
         {
-        // משנים מ-.jpg ל-.png ומוסיפים את התחילית _food או _animal לפי השמות האמיתיים
-            { "Food", Enumerable.Range(1, 20).Select(i => $"/images/Food/{i}.jpg").ToList() },
-            { "Animals", Enumerable.Range(1, 10).Select(i => $"/images/Animals/{i}.jpg").ToList() }
-        };
-
-        public void SelectCategory(string category)
-        {
-            if (_categoryDatabase.ContainsKey(category))
+            var imageUrls = new List<string>();
+            
+            try
             {
-                SelectedCategory = category;
-                CurrentCategoryImages = _categoryDatabase[category];
-                OnCategoryChanged?.Invoke();
+                string baseImagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "bootstrap", "images");
+
+                if (!Directory.Exists(baseImagesPath))
+                {
+                    return imageUrls;
+                }
+
+                string normalizedSearch = categoryName.ToLower().Trim();
+
+                // מוצא את התיקייה הנכונה (למשל food)
+                string folderPath = Directory.GetDirectories(baseImagesPath)
+                    .FirstOrDefault(d => {
+                        string actualName = Path.GetFileName(d).ToLower();
+                        return actualName == normalizedSearch || 
+                               actualName == normalizedSearch.TrimEnd('s') || 
+                               normalizedSearch == actualName.TrimEnd('s');
+                    });
+
+                if (folderPath == null || !Directory.Exists(folderPath))
+                {
+                    folderPath = Directory.GetDirectories(baseImagesPath).FirstOrDefault();
+                }
+
+                if (folderPath != null && Directory.Exists(folderPath))
+                {
+                    // שולף את כל הקבצים
+                    var files = Directory.GetFiles(folderPath, "*.*")
+                                         .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || 
+                                                     s.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || 
+                                                     s.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                                         .ToList();
+
+                    string actualFolderName = Path.GetFileName(folderPath);
+
+                    foreach (var file in files)
+                    {
+                        // 🌟 התיקון הקריטי: לוקח אך ורק את השם האמיתי של הקובץ מהדיסק בלי שום מניפולציה או תוספת!
+                        string fileName = Path.GetFileName(file);
+                        
+                        imageUrls.Add($"bootstrap/images/{actualFolderName}/{fileName}");
+                    }
+                }
             }
-        }
-
-        // פונקציית עזר להגרלת X תמונות ייחודיות מתוך המאגר הנוכחי
-        public List<string> GetRandomImages(int count)
-        {
-            var random = new Random();
-            return CurrentCategoryImages.OrderBy(x => random.Next()).Take(count).ToList();
-        }
-
-        // פונקציית תאימות עבור המשחקים שמחפשים את רשימת התמונות של הקטגוריה
-        public List<string> GetCategoryImages(string category)
-        {
-            if (_categoryDatabase.ContainsKey(category))
+            catch (Exception)
             {
-                return _categoryDatabase[category];
-            }
-        // תמיכה למקרה שהמשחק שולח "Food" או "מאכלים"
-            if (category == "מאכלים" && _categoryDatabase.ContainsKey("Food")) return _categoryDatabase["Food"];
-            if (category == "חיות" && _categoryDatabase.ContainsKey("Animals")) return _categoryDatabase["Animals"];
-        
-            return CurrentCategoryImages;
+                // הגנה מקריסה
+            };
+
+            return imageUrls.Take(8).ToList();
         }
     }
 }

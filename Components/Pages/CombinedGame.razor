@@ -12,21 +12,25 @@
 else
 {
     <h2>Memory Game</h2>
-    <div class="memory-game-board">
-        @foreach (var card in Cards)
-        {
-            <div class="memory-card @(card.IsFlipped ? "flipped" : "") @(card.IsMatched ? "matched" : "")" @onclick="(() => FlipCard(card))">
-                <div class="card-inner">
-                    <div class="card-front">
-                        <img src="@card.PictureUrl" alt="Card Image" />
-                    </div>
-                    <div class="card-back"></div>
+<div class="memory-game-board">
+    @foreach (var card in Cards)
+    {
+        <!-- הוספת מחלקת flipped בצורה דינמית -->
+        <div class="memory-card @(card.IsFlipped ? "flipped" : "") @(card.IsMatched ? "matched" : "")" @onclick="(() => FlipCard(card))">
+            <div class="card-inner">
+                <!-- צד אחורי: מה שרואים כשהקלף סגור (עם סימן שאלה) -->
+                <div class="card-back">
+                    <div class="card-back-pattern">?</div>
+                </div>
+                <!-- צד קדמי: התמונה שרואים כשהקלף מתהפך -->
+                <div class="card-front">
+                    <img src="@card.PictureUrl" alt="Card Image" />
                 </div>
             </div>
-        }
-    </div>
-    <button class="btn btn-primary mt-3" @onclick="ResetGame">Reset Memory Game</button>
-
+        </div>
+    }
+</div>
+<button class="btn btn-primary mt-3" @onclick="ResetGame">Reset Memory Game</button>
     <h2 class="mt-5">Picture Cards</h2>
     <div class="card-display-board">
         @foreach (var pictureUrl in PicturesInSelectedCategory)
@@ -76,19 +80,21 @@ else
     }
 
     private async Task FlipCard(MemoryCard card)
+{
+    if (FlippedCards.Count < 2 && !card.IsFlipped && !card.IsMatched)
     {
-        if (FlippedCards.Count < 2 && !card.IsFlipped && !card.IsMatched)
-        {
-            card.IsFlipped = true;
-            FlippedCards.Add(card);
+        card.IsFlipped = true;
+        FlippedCards.Add(card);
 
-            if (FlippedCards.Count == 2)
-            {
-                await Task.Delay(1000); // See the second card
-                CheckForMatch();
-            }
+        if (FlippedCards.Count == 2)
+        {
+            StateHasChanged(); // 🌟 מאלץ את המסך להתרענן ולהראות את הקלף השני מיד!
+            await Task.Delay(1000); // רואים את שני הקלפים למשך שנייה
+            CheckForMatch();
+            StateHasChanged(); // מרענן שוב לאחר הבדיקה (אם הם נסגרים או נשארים פתוחים)
         }
     }
+}
 
     private void CheckForMatch()
     {

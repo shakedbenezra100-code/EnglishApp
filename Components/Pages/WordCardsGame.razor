@@ -1,0 +1,71 @@
+@page "/wordcardsgame"
+@inject EnglishApp.Services.PictureService PictureService
+
+<PageTitle>Word Cards Game</PageTitle>
+
+<h1>Word Cards Game</h1>
+
+@if (SelectedCategory == null)
+{
+    <PictureCategorySelector OnCategoryChanged="OnCategoryChanged"/>
+}
+else
+{
+    <div class="card-display-board">
+        @foreach (var wordCard in WordCards)
+        {
+            <div class="picture-card" @onclick="(() => FlipCard(wordCard))">
+                <img src="@wordCard.PictureUrl" alt="Category Image" />
+                <p class="word-text">@wordCard.EnglishWord</p>
+                @if (wordCard.IsFlipped)
+                {
+                    <p class="translation-text">@wordCard.HebrewTranslation</p>
+                }
+            </div>
+        }
+    </div>
+    <button class="btn btn-secondary mt-3" @onclick="ResetSelection">Choose Another Category</button>
+}
+
+@code {
+    private string SelectedCategory { get; set; }
+    private List<WordCard> WordCards { get; set; }
+
+    private void OnCategoryChanged(string category)
+    {
+        SelectedCategory = category;
+        InitializeWordCards();
+    }
+
+    private void InitializeWordCards()
+    {
+        // This needs to be improved to get words and translations from the service.
+        // For now, using dummy data.
+        WordCards = PictureService.GetPicturesWithTranslations(SelectedCategory)
+                            .Select(kv => new WordCard
+                            {
+                                PictureUrl = $"images/{SelectedCategory.ToLower().Replace(" ", "_")}/{kv.Key}.png",
+                                EnglishWord = kv.Key,
+                                HebrewTranslation = kv.Value
+                            }).ToList();
+    }
+
+    private void FlipCard(WordCard card)
+    {
+        card.IsFlipped = !card.IsFlipped;
+    }
+
+    private void ResetSelection()
+    {
+        SelectedCategory = null;
+        WordCards = null;
+    }
+
+    public class WordCard
+    {
+        public string PictureUrl { get; set; }
+        public string EnglishWord { get; set; }
+        public string HebrewTranslation { get; set; }
+        public bool IsFlipped { get; set; }
+    }
+}

@@ -21,16 +21,24 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Users\Uzer\EnglishApp
 build_property._RazorSourceGeneratorDebug = 
 
+[C:/Users/Uzer/EnglishApp/wwwroot/pages/FlashcardsGame.razor]
+build_metadata.AdditionalFiles.TargetPath = d3d3cm9vdFxwYWdlc1xGbGFzaGNhcmRzR2FtZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Uzer/EnglishApp/wwwroot/pages/MemoryGame.razor]
+build_metadata.AdditionalFiles.TargetPath = d3d3cm9vdFxwYWdlc1xNZW1vcnlHYW1lLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Uzer/EnglishApp/wwwroot/pages/WhatIsMissingGame.razor]
+build_metadata.AdditionalFiles.TargetPath = d3d3cm9vdFxwYWdlc1xXaGF0SXNNaXNzaW5nR2FtZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Uzer/EnglishApp/Components/App.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xBcHAucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Uzer/EnglishApp/Components/Pages/CardsWithPictures.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDYXJkc1dpdGhQaWN0dXJlcy5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/Uzer/EnglishApp/Components/Pages/Counter.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb3VudGVyLnJhem9y
+[C:/Users/Uzer/EnglishApp/Components/Pages/CombinedGame.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21iaW5lZEdhbWUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Uzer/EnglishApp/Components/Pages/Error.razor]
@@ -41,12 +49,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Uzer/EnglishApp/Components/Pages/Links.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xMaW5rcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Uzer/EnglishApp/Components/Pages/MemoryGame.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xNZW1vcnlHYW1lLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Uzer/EnglishApp/Components/Pages/Weather.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xXZWF0aGVyLnJhem9y
+[C:/Users/Uzer/EnglishApp/Components/Pages/WordCardsGame.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xXb3JkQ2FyZHNHYW1lLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Uzer/EnglishApp/Components/PictureCategorySelector.razor]
@@ -68,3 +80,7 @@ build_metadata.AdditionalFiles.CssScope = b-e85ksht5xp
 [C:/Users/Uzer/EnglishApp/Components/Layout/NavMenu.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTmF2TWVudS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = b-i6y3tn69xl
+
+[C:/Users/Uzer/EnglishApp/Components/Pages/Games.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xHYW1lcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-gtsaozbs00

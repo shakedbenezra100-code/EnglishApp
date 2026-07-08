@@ -1,0 +1,120 @@
+@page "/what-is-missing/{CategoryName}"
+@using EnglishApp.Services
+@inject EnglishApp.Services.GameService GameService
+<h3>משחק: מה חסר? - קטגוריית @CategoryName</h3>
+
+@if (CurrentRoundCards.Count > 0)
+{
+    <div class="d-flex justify-content-center my-4 gap-3">
+        @foreach (var card in CurrentRoundCards)
+        {
+            <div class="card p-2 border shadow-sm" style="width: 140px; height: 140px; display: flex; justify-content: center; align-items: center; background-color: @(card.IsHidden ? "#343a40" : "#ffffff");">
+                @if (card.IsHidden)
+                {
+                    <span class="text-white fs-2">?</span>
+                }
+                else
+                {
+<img src="@card.ImageUrl" style="width: 100%; height: 100%; object-fit: contain;" />                }
+            </div>
+        }
+    </div>
+
+    <div class="text-center mt-4">
+        @if (!IsCardCurrentlyHidden)
+        {
+            <button class="btn btn-danger btn-lg me-2" @onclick="HideRandomCard">העלם תמונה אחת</button>
+        }
+        else
+        {
+            <button class="btn btn-success btn-lg me-2" @onclick="RevealHiddenCard">גלה את התמונה שהורדה</button>
+            <button class="btn btn-warning btn-lg me-2" @onclick="HideAnotherCard">העלם תמונה נוספת</button>
+        }
+
+        <button class="btn btn-primary btn-lg ms-4" @onclick="LoadNextRound" disabled="@(!RemainingPool.Any() && !IsCardCurrentlyHidden)">
+            @(RemainingPool.Any() ? "5 קלפים הבאים" : "סיימנו את כל התמונות!")
+        </button>
+    </div>
+}
+else
+{
+    <div class="text-center mt-5">
+        <p class="fs-4">כל התמונות בקטגוריה הוצגו!</p>
+        <button class="btn btn-success btn-lg" @onclick="ResetGame">התחל משחק מחדש</button>
+    </div>
+}
+
+@code {
+    [Parameter] public string CategoryName { get; set; } = "";
+    
+    private List<string> CompletePool = new();      // כל התמונות של הקטגוריה
+    private List<string> RemainingPool = new();     // התמונות שטרם השתמשנו בהן
+    private List<MissingGameCard> CurrentRoundCards = new(); // 5 התמונות המוצגות כרגע
+
+    private bool IsCardCurrentlyHidden => CurrentRoundCards.Any(c => c.IsHidden);
+
+    protected override void OnParametersSet()
+    {
+        ResetGame();
+    }
+
+    private void ResetGame()
+    {
+        CompletePool = GameService.GetCategoryImages(CategoryName).OrderBy(x => Guid.NewGuid()).ToList();
+        RemainingPool = new List<string>(CompletePool);
+        LoadNextRound();
+    }
+
+    private void LoadNextRound()
+    {
+        // אם אין יותר קלפים במאגר הכללי, המשחק נגמר
+        if (RemainingPool.Count == 0)
+        {
+            CurrentRoundCards.Clear();
+            return;
+        }
+
+        // לוקחים עד 5 קלפים מהמאגר שנותר
+        var roundImages = RemainingPool.Take(5).ToList();
+        
+        // מורידים אותם מהמאגר הזמין להבא
+        RemainingPool.RemoveRange(0, roundImages.Count);
+
+        // מייצרים את רשימת התצוגה הנוכחית
+        CurrentRoundCards = roundImages.Select(img => new MissingGameCard { ImageUrl = img }).ToList();
+    }
+
+    private void HideRandomCard()
+    {
+        // מחפשים את הקלפים שאינם מוסתרים ומגרילים אחד להסתרה
+        var visibleCards = CurrentRoundCards.Where(c => !c.IsHidden).ToList();
+        if (visibleCards.Any())
+        {
+            var randomCard = visibleCards[new Random().Next(visibleCards.Count)];
+            randomCard.IsHidden = true;
+            randomCard.WasHiddenThisRound = true;
+        }
+    }
+
+    private void RevealHiddenCard()
+    {
+        // מחזיר את המצב לקדמותו ומציג את כל הקלפים שהוסתרו
+        foreach (var card in CurrentRoundCards)
+        {
+            card.IsHidden = false;
+        }
+    }
+
+    private void HideAnotherCard()
+    {
+        // מאפשר להפוך כפתור/קלף נוסף מבלי לגלות את הקודם
+        HideRandomCard();
+    }
+
+    public class MissingGameCard
+    {
+        public string ImageUrl { get; set; } = "";
+        public bool IsHidden { get; set; } = false;
+        public bool WasHiddenThisRound { get; set; } = false;
+    }
+}

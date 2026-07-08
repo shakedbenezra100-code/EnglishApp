@@ -1,0 +1,146 @@
+@page "/tempcombinedgame"
+@inject EnglishApp.Services.PictureService PictureService
+
+<PageTitle>משחקים</PageTitle>
+
+<h1>משחקים</h1>
+
+@if (SelectedCategory == null)
+{
+    <PictureCategorySelector OnCategoryChanged="OnCategoryChanged" />
+}
+else
+{
+    <h2>Memory Game</h2>
+<div class="memory-game-board">
+    @foreach (var card in Cards)
+    {
+        <!-- הוספת מחלקת flipped בצורה דינמית -->
+        <div class="memory-card @(card.IsFlipped ? "flipped" : "") @(card.IsMatched ? "matched" : "")" @onclick="(() => FlipCard(card))">
+            <div class="card-inner">
+                <!-- צד אחורי: מה שרואים כשהקלף סגור (עם סימן שאלה) -->
+                <div class="card-back">
+                    <div class="card-back-pattern">?</div>
+                </div>
+                <!-- צד קדמי: התמונה שרואים כשהקלף מתהפך -->
+                <div class="card-front">
+                    <img src="@card.PictureUrl" alt="Card Image" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<button class="btn btn-primary mt-3" @onclick="ResetGame">Reset Memory Game</button>
+    <h2 class="mt-5">Picture Cards</h2>
+    <div class="card-display-board">
+        @foreach (var pictureUrl in PicturesInSelectedCategory)
+        {
+            <div class="picture-card">
+                <img src="@pictureUrl" alt="Category Image" />
+            </div>
+        }
+    </div>
+    <button class="btn btn-primary mt-3" @onclick="ResetSelection">Choose Another Category</button>
+}
+
+@code {
+    private string SelectedCategory { get; set; }
+    private List<MemoryCard> Cards { get; set; }
+    private List<MemoryCard> FlippedCards { get; set; }
+    private int MatchedPairs { get; set; }
+    private List<string> PicturesInSelectedCategory { get; set; }
+
+    protected override void OnInitialized()
+    {
+        FlippedCards = new List<MemoryCard>();
+    }
+
+    private void OnCategoryChanged(string category)
+    {
+        SelectedCategory = category;
+        InitializeGame();
+        PicturesInSelectedCategory = PictureService.GetPictures(SelectedCategory).ToList();
+    }
+
+    private void InitializeGame()
+    {
+        var pictures = PictureService.GetPictures(SelectedCategory).ToList();
+        var gamePictures = pictures.Take(6).ToList(); // Use 6 unique pictures for a 12-card game
+
+        var allCards = new List<MemoryCard>();
+        foreach (var picUrl in gamePictures)
+        {
+            allCards.Add(new MemoryCard { Id = Guid.NewGuid(), PictureUrl = picUrl });
+            allCards.Add(new MemoryCard { Id = Guid.NewGuid(), PictureUrl = picUrl }); // Add a pair
+        }
+
+        Cards = allCards.OrderBy(a => Guid.NewGuid()).ToList(); // Shuffle cards
+        MatchedPairs = 0;
+        FlippedCards.Clear();
+    }
+
+    private async Task FlipCard(MemoryCard card)
+{
+    if (FlippedCards.Count < 2 && !card.IsFlipped && !card.IsMatched)
+    {
+        card.IsFlipped = true;
+        FlippedCards.Add(card);
+
+        if (FlippedCards.Count == 2)
+        {
+            StateHasChanged(); // 🌟 מאלץ את המסך להתרענן ולהראות את הקלף השני מיד!
+            await Task.Delay(1000); // רואים את שני הקלפים למשך שנייה
+            CheckForMatch();
+            StateHasChanged(); // מרענן שוב לאחר הבדיקה (אם הם נסגרים או נשארים פתוחים)
+        }
+    }
+}
+
+    private void CheckForMatch()
+    {
+        var card1 = FlippedCards[0];
+        var card2 = FlippedCards[1];
+
+        if (card1.PictureUrl == card2.PictureUrl)
+        {
+            card1.IsMatched = true;
+            card2.IsMatched = true;
+            MatchedPairs++;
+        }
+        else
+        {
+            card1.IsFlipped = false;
+            card2.IsFlipped = false;
+        }
+
+        FlippedCards.Clear();
+
+        if (MatchedPairs == Cards.Count / 2)
+        {
+            // Game over, all matched!
+            // You can add a game completion message or action here.
+        }
+    }
+
+    private void ResetGame()
+    {
+        InitializeGame();
+    }
+
+    private void ResetSelection()
+    {
+        SelectedCategory = null;
+        Cards = null;
+        FlippedCards.Clear();
+        MatchedPairs = 0;
+        PicturesInSelectedCategory = null;
+    }
+
+    public class MemoryCard
+    {
+        public Guid Id { get; set; }
+        public string PictureUrl { get; set; }
+        public bool IsFlipped { get; set; }
+        public bool IsMatched { get; set; }
+    }
+}

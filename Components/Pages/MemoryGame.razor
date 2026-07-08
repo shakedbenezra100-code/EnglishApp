@@ -1,4 +1,5 @@
 @page "/memorygame"
+@rendermode InteractiveWebAssembly
 @inject EnglishApp.Services.PictureService PictureService
 
 <PageTitle>Memory Game</PageTitle>
@@ -24,7 +25,8 @@ else
             </div>
         }
     </div>
-    <button class="btn btn-primary mt-3" @onclick="ResetGame">Reset Game</button>
+    <button class="btn btn-primary mt-3" @onclick="ResetGame">Reset Memory Game</button>
+    <button class="btn btn-secondary mt-3" @onclick="ResetSelection">Choose Another Category</button>
 }
 
 @code {
@@ -46,8 +48,7 @@ else
 
     private void InitializeGame()
     {
-        var pictures = PictureService.GetPictures(SelectedCategory).ToList();
-        var gamePictures = pictures.Take(6).ToList(); // Use 6 unique pictures for a 12-card game
+        var gamePictures = PictureService.GetPictures(SelectedCategory).OrderBy(x => Guid.NewGuid()).Take(6).ToList(); // Use 6 unique pictures for a 12-card game
 
         var allCards = new List<MemoryCard>();
         foreach (var picUrl in gamePictures)
@@ -103,6 +104,11 @@ else
     }
 
     private void ResetGame()
+    {
+        InitializeGame();
+    }
+
+    private void ResetSelection()
     {
         SelectedCategory = null;
         Cards = null;

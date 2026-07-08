@@ -1,0 +1,198 @@
+@page "/memory-game/{CategoryName}"
+@using EnglishApp.Services
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@rendermode InteractiveServer
+@inject GameService GameService
+@inject NavigationManager NavigationManager
+
+<h3 class="text-center my-4">משחק הזיכרון - קטגוריית @CategoryName</h3>
+
+@if (IsGameFinished)
+{
+    <div class="text-center mt-5">
+        <div class="alert alert-success fs-3 shadow-sm">כל הכבוד! סיימת את המשחק ב-@Moves צעדים!</div>
+        <button class="btn btn-success btn-lg shadow" @onclick="ResetGame">שחק שוב</button>
+        <button class="btn btn-outline-secondary btn-lg ms-3" @onclick="GoBackToGames">חזרה למשחקים</button>
+    </div>
+}
+else
+{
+    <div class="text-center mb-3">
+        <span class="fs-5 badge bg-primary p-2">מהלכים: @Moves</span>
+    </div>
+
+    <div class="container">
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3 justify-content-center">
+            @foreach (var card in Cards)
+            {
+                <div class="col d-flex justify-content-center">
+                    @* קובייה פשוטה ויציבה לחלוטין *@
+                    <div class="memory-card-box shadow-sm" @onclick="() => HandleCardClick(card)">
+                        
+                        @if (card.IsFlipped || card.IsMatched)
+                        {
+                            @* מצב פתוח: מציגים אך ורק את התמונה *@
+                            <div class="card-content image-face @(card.IsMatched ? "matched" : "")">
+                                <img src="@card.ImageUrl" />
+                            </div>
+                        }
+                        else
+                        {
+                            @* מצב סגור: מציגים אך ורק את הסימן שאלה *@
+                            <div class="card-content back-face">
+                                <span>?</span>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<style>
+    .memory-card-box {
+        width: 120px;
+        height: 120px;
+        background-color: #ffffff;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        cursor: pointer;
+        user-select: none;
+        overflow: hidden;
+    }
+
+    .card-content {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* עיצוב הגב עם הסימן שאלה */
+    .back-face {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    /* עיצוב הפנים עם התמונה */
+    .image-face img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    /* עיצוב קלף שנמצא לו זוג */
+    .matched {
+        background-color: #e8f5e9;
+        border: 2px solid #198754;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public string CategoryName { get; set; } = string.Empty;
+
+    private List<MemoryCard> Cards { get; set; } = new List<MemoryCard>();
+    private MemoryCard? firstSelectedCard = null;
+    private MemoryCard? secondSelectedCard = null;
+    private bool isChecking = false; 
+    private int Moves = 0;
+
+    private bool IsGameFinished => Cards.Count > 0 && Cards.All(c => c.IsMatched);
+
+    protected override void OnParametersSet()
+    {
+        ResetGame();
+    }
+
+    private void ResetGame()
+    {
+        Moves = 0;
+        firstSelectedCard = null;
+        secondSelectedCard = null;
+        isChecking = false;
+
+        if (string.IsNullOrEmpty(CategoryName))
+        {
+            CategoryName = "food";
+        }
+
+        var baseImages = GameService.GetCategoryImages(CategoryName);
+
+        var cardList = new List<MemoryCard>();
+        int idCounter = 0;
+
+        if (baseImages != null && baseImages.Any())
+        {
+            foreach (var img in baseImages)
+            {
+                cardList.Add(new MemoryCard { Id = idCounter++, ImageUrl = img });
+                cardList.Add(new MemoryCard { Id = idCounter++, ImageUrl = img });
+            }
+        }
+
+        Cards = cardList.OrderBy(x => Guid.NewGuid()).ToList();
+        StateHasChanged();
+    }
+
+    private async Task HandleCardClick(MemoryCard clickedCard)
+    {
+        if (isChecking || clickedCard.IsFlipped || clickedCard.IsMatched)
+            return;
+
+        clickedCard.IsFlipped = true;
+        StateHasChanged(); 
+
+        if (firstSelectedCard == null)
+        {
+            firstSelectedCard = clickedCard;
+        }
+        else
+        {
+            secondSelectedCard = clickedCard;
+            Moves++;
+            isChecking = true;
+            StateHasChanged(); 
+
+            if (firstSelectedCard.ImageUrl == secondSelectedCard.ImageUrl)
+            {
+                firstSelectedCard.IsMatched = true;
+                secondSelectedCard.IsMatched = true;
+                ResetTurn();
+            }
+            else
+            {
+                await Task.Delay(1000);
+                firstSelectedCard.IsFlipped = false;
+                secondSelectedCard.IsFlipped = false;
+                ResetTurn();
+            }
+        }
+    }
+
+    private void ResetTurn()
+    {
+        firstSelectedCard = null;
+        secondSelectedCard = null;
+        isChecking = false;
+        StateHasChanged();
+    }
+
+    private void GoBackToGames()
+    {
+        NavigationManager.NavigateTo("/games"); 
+    }
+
+    public class MemoryCard
+    {
+        public int Id { get; set; }
+        public string ImageUrl { get; set; } = "";
+        public bool IsFlipped { get; set; } = false;
+        public bool IsMatched { get; set; } = false;
+    }
+}

@@ -41,7 +41,7 @@ namespace EnglishApp.Services
                     // שולף את כל הקבצים
                     var files = Directory.GetFiles(folderPath, "*.*")
                                          .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || 
-                                                     s.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || 
+                                                     s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || 
                                                      s.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
                                          .ToList();
 
@@ -61,7 +61,7 @@ namespace EnglishApp.Services
                 // הגנה מקריסה
             };
 
-            return imageUrls.Take(8).ToList();
+            return imageUrls.Take(100).ToList();
         }
     }
 }

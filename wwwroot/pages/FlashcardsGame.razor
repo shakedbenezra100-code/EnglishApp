@@ -2,9 +2,10 @@
 @using Microsoft.AspNetCore.Components.Web
 @using EnglishApp.Services
 @inject EnglishApp.Services.GameService GameService
-<h3>משחק כרטיסיות - @CategoryName</h3>
+<h2 class="text-center">משחק כרטיסיות - @CategoryName</h2>
 
-@if (CategoryImages.Count > 0)
+@* תיקון 1: בדיקה בטוחה שהרשימה קיימת ואינה null לפני שבודקים Count *@
+@if (CategoryImages != null && CategoryImages.Count > 0)
 {
     <div class="d-flex flex-column align-items-center mt-4">
         <div class="card p-3 shadow" style="width: 300px; height: 300px; display: flex; justify-content: center; align-items: center;">
@@ -29,13 +30,14 @@ else
 
     protected override void OnParametersSet()
     {
-        CategoryImages = GameService.GetCategoryImages(CategoryName);
+        // תיקון 2: שימוש באופרטור ?? כדי להבטיח שאם יחזור null, נתחל רשימה ריקה חדשה
+        CategoryImages = GameService.GetCategoryImages(CategoryName) ?? new List<string>();
         currentIndex = 0;
     }
 
     private void NextCard()
     {
-        if (currentIndex < CategoryImages.Count - 1) currentIndex++;
+        if (CategoryImages != null && currentIndex < CategoryImages.Count - 1) currentIndex++;
     }
 
     private void PrevCard()

@@ -52,49 +52,41 @@
     protected override void OnInitialized()
     {
         FlippedCards = new List<MemoryCard>();
+        InitializeGame(); // Call InitializeGame here
     }
 
     protected override void OnParametersSet()
     {
-        if (!string.IsNullOrEmpty(CategoryName))
-        {
-            InitializeGame();
-        }
+        // No need to call InitializeGame here, as it's called in OnInitialized
     }
 
     private void InitializeGame()
 {
-    // שימוש בשם הקטגוריה באותיות קטנות (colors) כדי להתאים לשירות ולתיקייה
     string folderName = CategoryName.ToLower();
     
-    // שליפת הנתונים ישירות מהשירות של האפליקציה שלך
     var gamePictures = PictureService.GetPictures(folderName);
 
-    // ליתר ביטחון, אם חזר ריק, ננסה עם השם המקורי מה-URL
     if (gamePictures == null || !gamePictures.Any())
     {
+        // If no pictures found for the lowercase category, try with the original case
         gamePictures = PictureService.GetPictures(CategoryName);
     }
 
     if (gamePictures != null && gamePictures.Any())
     {
-        // לוקחים 6 תמונות ומערבבים
         var selectedPictures = gamePictures.OrderBy(x => Guid.NewGuid()).Take(6).ToList();
         var allCards = new List<MemoryCard>();
         
         foreach (var picUrl in selectedPictures)
         {
-            // הוספת זוג קלפים לכל תמונה עם הנתיב המדויק שהשירות החזיר
             allCards.Add(new MemoryCard { Id = Guid.NewGuid(), PictureUrl = picUrl });
             allCards.Add(new MemoryCard { Id = Guid.NewGuid(), PictureUrl = picUrl });
         }
 
-        // ערבוב סופי של הלוח
         Cards = allCards.OrderBy(a => Guid.NewGuid()).ToList();
     }
     else
     {
-        // אם הגענו לכאן, השירות החזיר רשימה ריקה עבור המילה הזו
         Cards = new List<MemoryCard>();
     }
 

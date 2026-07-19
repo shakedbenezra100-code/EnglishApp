@@ -19,10 +19,10 @@ namespace EnglishApp.Services
             {
                 "Animals", new Dictionary<string, string>
                 {
-                    { "cat", "חתול" },
-                    { "dog", "כלב" },
-                    { "elephant", "פיל" },
-                    { "lion", "אריה" }
+                    { "4", "חתול" },
+                    { "3", "כלב" },
+                    { "2", "פיל" },
+                    { "1", "אריה" }
                 }
             },
             {
@@ -37,10 +37,12 @@ namespace EnglishApp.Services
             {
                 "Numbers", new Dictionary<string, string>
                 {
-                    { "one", "אחד" },
-                    { "two", "שתיים" },
-                    { "three", "שלוש" },
-                    { "four", "ארבע" }
+                    { "1", "אחד" },
+                    { "2", "שתיים" },
+                    { "3", "שלוש" },
+                    { "4", "ארבע" },
+                    { "5", "חמש" },
+                    { "6", "שש" }
                 }
             },
             {
@@ -124,10 +126,19 @@ namespace EnglishApp.Services
 
         public IEnumerable<string> GetPictures(string category)
         {
+            // First, try to get the category with the provided casing
             if (_pictureCategories.TryGetValue(category, out var wordsAndTranslations))
             {
-                return wordsAndTranslations.Select(kv => $"images/{category.ToLower().Replace(" ", "_")}/{kv.Key}.png");
+                return wordsAndTranslations.Select(kv => $"bootstrap/images/{category.ToLower().Replace(" ", "_")}/{kv.Key}.jpg.jpeg");
             }
+
+            // If not found, try to find a case-insensitive match
+            var key = _pictureCategories.Keys.FirstOrDefault(k => k.Equals(category, StringComparison.OrdinalIgnoreCase));
+            if (key != null && _pictureCategories.TryGetValue(key, out wordsAndTranslations))
+            {
+                return wordsAndTranslations.Select(kv => $"bootstrap/images/{key.ToLower().Replace(" ", "_")}/{kv.Key}.jpg.jpeg");
+            }
+
             return Enumerable.Empty<string>();
         }
 

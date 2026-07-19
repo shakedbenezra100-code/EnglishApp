@@ -44,7 +44,7 @@ else
         WordCards = PictureService.GetPicturesWithTranslations(SelectedCategory)
                             .Select(kv => new WordCard
                             {
-                                PictureUrl = $"images/{SelectedCategory.ToLower().Replace(" ", "_")}/{kv.Key}.png",
+                                PictureUrl = $"images/{SelectedCategory.ToLower().Replace(" ", "_")}/{kv.Key}.jpg",
                                 EnglishWord = kv.Key,
                                 HebrewTranslation = kv.Value
                             }).ToList();

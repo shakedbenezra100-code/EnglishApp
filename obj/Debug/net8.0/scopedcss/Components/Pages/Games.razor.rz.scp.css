@@ -1,0 +1,165 @@
+.games-container[b-gtsaozbs00] {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+}
+
+.page-title[b-gtsaozbs00] {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.page-subtitle[b-gtsaozbs00] {
+    color: #7f8c8d;
+    margin-bottom: 40px;
+}
+
+/* הגדרת גריד של 3 עמודות שמתכווץ בנייד לעמודה אחת */
+.games-grid[b-gtsaozbs00] {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    padding: 10px;
+}
+
+/* עיצוב הקובייה (הכרטיס) */
+.game-card[b-gtsaozbs00] {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 30px 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #eef2f3;
+}
+
+/* אפקט ריחוף לקוביות */
+.game-card:hover[b-gtsaozbs00] {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.game-icon[b-gtsaozbs00] {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.game-name[b-gtsaozbs00] {
+    color: #34495e;
+    font-size: 1.4rem;
+    margin: 10px 0;
+    font-weight: 600;
+}
+
+.game-description[b-gtsaozbs00] {
+    color: #95a5a6;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    min-height: 45px; /* שומר על גובה אחיד */
+}
+
+/* כפתור כניסה למשחק */
+.play-btn[b-gtsaozbs00] {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.play-btn:hover[b-gtsaozbs00] {
+    background-color: #2980b9;
+}
+
+/* ========================================== */
+/* 🧠 עיצוב חדש עבור משחק הזיכרון (Memory Game) 🧠 */
+/* ========================================== */
+
+/* לוח המשחק של הזיכרון */
+.memory-game-board[b-gtsaozbs00] {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* יוצר 4 עמודות */
+    gap: 15px;
+    max-width: 600px;
+    margin: 20px auto;
+    perspective: 1000px; /* מאפשר אפקט תלת-ממדי של עומק */
+}
+
+/* כרטיס הזיכרון */
+.memory-card[b-gtsaozbs00] {
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    background-color: transparent;
+}
+
+/* המיכל הפנימי שמסתובב */
+.card-inner[b-gtsaozbs00] {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+/* כשיש קלאס flipped או matched, סובב את החלק הפנימי ב-180 מעלות */
+.memory-card.flipped .card-inner[b-gtsaozbs00], 
+.memory-card.matched .card-inner[b-gtsaozbs00] {
+    transform: rotateY(180deg);
+}
+
+/* הגדרות משותפות לשני צידי הקלף */
+.card-front[b-gtsaozbs00], .card-back[b-gtsaozbs00] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* מסתיר את הגב הנגדי כשהוא הפוך */
+    backface-visibility: hidden;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* עיצוב גב הכרטיס (כשהוא סגור) */
+.card-back[b-gtsaozbs00] {
+    background-color: #34495e;
+    color: white;
+}
+
+.card-back-pattern[b-gtsaozbs00] {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+/* עיצוב חזית הכרטיס (כשהוא פתוח ומציג את התמונה) */
+.card-front[b-gtsaozbs00] {
+    background-color: #fff;
+    transform: rotateY(180deg); /* מתחיל מסובב מראש, כדי שיתיישר בהיפוך */
+}
+
+.card-front img[b-gtsaozbs00] {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+/* עיצוב כרטיס שכבר נמצא לו זוג */
+.memory-card.matched[b-gtsaozbs00] {
+    pointer-events: none; /* חוסם לחיצות נוספות */
+    opacity: 0.7;
+}
+
+

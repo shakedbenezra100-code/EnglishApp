@@ -4,32 +4,73 @@
 
 <PageTitle>Memory Game</PageTitle>
 
-<h1>Memory Game - @CategoryName</h1>
+<h1 style="text-align: right; width: 100%;">משחק הזיכרון - @CategoryName</h1>
 
-<div class="memory-game-board" style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
-    @if (Cards != null && Cards.Count > 0)
+<div class="memory-game-board" style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px;">
+    @if (_cards != null && _cards.Count > 0)
     {
-        @foreach (var card in Cards)
-        {
-            <div class="memory-card @(card.IsFlipped ? "flipped" : "") @(card.IsMatched ? "matched" : "")" 
-                 @onclick="(() => FlipCard(card))" 
-                 style="width: 120px; height: 120px; cursor: pointer;">
-                <div class="card-inner" style="width: 100%; height: 100%;">
+        var halfCount = (int)Math.Ceiling(_cards.Count / 2.0);
+
+        <div class="card-row" style="display: flex; justify-content: center; gap: 15px;">
+            @for (int i = 0; i < halfCount; i++)
+            {
+                var card = _cards[i];
+                var cardNumber = i + 1;
+                <div @key="card.Id"
+                     class="memory-card"
+                     @onclick="(() => FlipCard(card))"
+                     style="width: 120px; height: 120px; cursor: pointer; position: relative;">
                     
-                    @if (card.IsFlipped || card.IsMatched)
-                    {
-                        <div class="card-front" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border: 2px solid #ccc; border-radius: 8px; background-color: white;">
-                            <img src="@card.PictureUrl" alt="Card Image" style="max-width: 90%; max-height: 90%; object-fit: contain;" />
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="card-back" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #007bff; color: white; font-size: 2rem; font-weight: bold; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                            ?
-                        </div>
-                    }
-                    
+                    <div class="card-inner" style="position: relative; width: 100%; height: 100%; text-align: center;">
+                        @if (card.IsFlipped || card.IsMatched)
+                        {
+                            <!-- פנים הכרטיס - מציג את התמונה בצורה יציבה -->
+                            <div class="card-front" style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border: 2px solid #ccc; border-radius: 8px; background-color: white;">
+                                <img src="@card.PictureUrl" alt="Card Image" style="max-width: 90%; max-height: 90%; object-fit: contain;" />
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- גב הכרטיס - מציג את המספר -->
+                            <div class="card-back" style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #007bff; color: white; font-size: 2rem; font-weight: bold; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <span class="card-number">@cardNumber</span>
+                            </div>
+                        }
+                    </div>
                 </div>
+            }
+        </div>
+
+        @if (_cards.Count > halfCount)
+        {
+            <div class="card-row" style="display: flex; justify-content: center; gap: 15px;">
+                @for (int i = halfCount; i < _cards.Count; i++)
+                {
+                    var card = _cards[i];
+                    var cardNumber = i + 1;
+                    <div @key="card.Id"
+                         class="memory-card"
+                         @onclick="(() => FlipCard(card))"
+                         style="width: 120px; height: 120px; cursor: pointer; position: relative;">
+                        
+                        <div class="card-inner" style="position: relative; width: 100%; height: 100%; text-align: center;">
+                            @if (card.IsFlipped || card.IsMatched)
+                            {
+                                <!-- פנים הכרטיס - מציג את התמונה בצורה יציבה -->
+                                <div class="card-front" style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border: 2px solid #ccc; border-radius: 8px; background-color: white;">
+                                    <img src="@card.PictureUrl" alt="Card Image" style="max-width: 90%; max-height: 90%; object-fit: contain;" />
+                                </div>
+                            }
+                            else
+                            {
+                                <!-- גב הכרטיס - מציג את המספר -->
+                                <div class="card-back" style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #007bff; color: white; font-size: 2rem; font-weight: bold; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                    <span class="card-number">@cardNumber</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
             </div>
         }
     }
@@ -45,90 +86,101 @@
     [Parameter]
     public string CategoryName { get; set; }
 
-    private List<MemoryCard> Cards { get; set; }
-    private List<MemoryCard> FlippedCards { get; set; }
-    private int MatchedPairs { get; set; }
-
-    protected override void OnInitialized()
-    {
-        FlippedCards = new List<MemoryCard>();
-        InitializeGame(); // Call InitializeGame here
-    }
+    private string _currentCategory;
+    private List<MemoryCard> _cards;
+    private MemoryCard _firstSelectedCard;
+    private bool _isChecking = false;
 
     protected override void OnParametersSet()
     {
-        // No need to call InitializeGame here, as it's called in OnInitialized
+        // טעינת המשחק תתרחש אך ורק בעת מעבר לקטגוריה חדשה
+        if (CategoryName != _currentCategory)
+        {
+            _currentCategory = CategoryName;
+            InitializeGame();
+        }
     }
 
     private void InitializeGame()
-{
-    string folderName = CategoryName.ToLower();
-    
-    var gamePictures = PictureService.GetPictures(folderName);
-
-    if (gamePictures == null || !gamePictures.Any())
     {
-        // If no pictures found for the lowercase category, try with the original case
-        gamePictures = PictureService.GetPictures(CategoryName);
-    }
-
-    if (gamePictures != null && gamePictures.Any())
-    {
-        var selectedPictures = gamePictures.OrderBy(x => Guid.NewGuid()).Take(6).ToList();
-        var allCards = new List<MemoryCard>();
-        
-        foreach (var picUrl in selectedPictures)
+        if (string.IsNullOrEmpty(CategoryName))
         {
-            allCards.Add(new MemoryCard { Id = Guid.NewGuid(), PictureUrl = picUrl });
-            allCards.Add(new MemoryCard { Id = Guid.NewGuid(), PictureUrl = picUrl });
+            _cards = new List<MemoryCard>();
+            return;
         }
 
-        Cards = allCards.OrderBy(a => Guid.NewGuid()).ToList();
-    }
-    else
-    {
-        Cards = new List<MemoryCard>();
-    }
+        string folderName = CategoryName.ToLower();
+        var gamePictures = PictureService.GetPictures(folderName);
 
-    MatchedPairs = 0;
-    FlippedCards.Clear();
-}
-
-    private async Task FlipCard(MemoryCard card)
-    {
-        if (FlippedCards.Count < 2 && !card.IsFlipped && !card.IsMatched)
+        if (gamePictures == null || !gamePictures.Any())
         {
-            card.IsFlipped = true;
-            FlippedCards.Add(card);
-            StateHasChanged(); 
+            gamePictures = PictureService.GetPictures(CategoryName);
+        }
 
-            if (FlippedCards.Count == 2)
+        if (gamePictures != null && gamePictures.Any())
+        {
+            var selectedPictures = gamePictures.OrderBy(x => Guid.NewGuid()).Take(6).ToList();
+            var allCards = new List<MemoryCard>();
+            
+            foreach (var picUrl in selectedPictures)
             {
-                await Task.Delay(1000);
-                CheckForMatch();
-                StateHasChanged(); 
+                allCards.Add(new MemoryCard { Id = Guid.NewGuid(), PictureUrl = picUrl });
+                allCards.Add(new MemoryCard { Id = Guid.NewGuid(), PictureUrl = picUrl });
             }
-        }
-    }
 
-    private void CheckForMatch()
-    {
-        var card1 = FlippedCards[0];
-        var card2 = FlippedCards[1];
-
-        if (card1.PictureUrl == card2.PictureUrl)
-        {
-            card1.IsMatched = true;
-            card2.IsMatched = true;
-            MatchedPairs++;
+            _cards = allCards.OrderBy(a => Guid.NewGuid()).ToList();
         }
         else
         {
-            card1.IsFlipped = false;
-            card2.IsFlipped = false;
+            _cards = new List<MemoryCard>();
         }
 
-        FlippedCards.Clear();
+        _firstSelectedCard = null;
+        _isChecking = false;
+    }
+
+    private async Task FlipCard(MemoryCard card)
+    {
+        if (_isChecking || card.IsFlipped || card.IsMatched)
+            return;
+
+        // 1. הפיכת הכרטיס הנבחר
+        card.IsFlipped = true;
+
+        // 2. אם זה הכרטיס הראשון שנפתח בחור
+        if (_firstSelectedCard == null)
+        {
+            _firstSelectedCard = card;
+            StateHasChanged(); // מרנדר מיד כדי שהתמונה תישאר פתוחה על המסך
+            return;
+        }
+
+        // 3. אם זה הכרטיס השני שנפתח
+        _isChecking = true;
+        StateHasChanged(); // מציג את הכרטיס השני מיד
+
+        if (_firstSelectedCard.PictureUrl == card.PictureUrl)
+        {
+            // התאמה! שומרים על שניהם במצב IsMatched כדי שיישארו פתוחים
+            _firstSelectedCard.IsMatched = true;
+            card.IsMatched = true;
+            
+            _firstSelectedCard = null;
+            _isChecking = false;
+            StateHasChanged();
+        }
+        else
+        {
+            // אין התאמה - ממתינים שנייה אחת שיראו את התמונות ואז הופכים חזרה
+            await Task.Delay(1000);
+
+            _firstSelectedCard.IsFlipped = false;
+            card.IsFlipped = false;
+
+            _firstSelectedCard = null;
+            _isChecking = false;
+            StateHasChanged();
+        }
     }
 
     private void ResetGame()
